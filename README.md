@@ -72,3 +72,24 @@ def format(cells):
         res.append("".join(line))
     return res
 ```
+
+Next we need to explain the constraints to the Solver. For the Solver a constrain consists of two essential things:
+1. A set of cells the constraint applies to.
+2. A function which takes the current possible values for those cells and returns the new (hopefully reduced) possible values.
+
+For Sudoku the constraint is that "a value can only appear once within the associated cells".
+We need to reframe this so that it tell us about the other cells.
+"If a value must appear in once cell then it can't appear in any of the others."
+That might look like:
+
+```
+def constraint(all_cells_possible_values: list[set[int]]) -> list[set[int]]:
+    for i, cell_possible_values in enumerate(all_cells_possible_values):
+        if len(cell_possible_values) == 1:
+            (cell_possible_value,) = cell_possible_values
+            # used, so remove from all others
+            for j, other_cell_possible_values in enumerate(all_cells_possible_values):
+                if j != i:
+                    other_cell_possible_values.discard(cell_possible_value)
+    return all_cells_possible_values
+```

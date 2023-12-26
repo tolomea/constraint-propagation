@@ -16,6 +16,26 @@ def format(cells):
     return res
 
 
+def constraint(all_cells_values: list[set[int]]) -> list[set[int]]:
+    # if a number can only be in one place then nothing else can be there
+    for v in range(1, 10):
+        indexes = [i for i, values in enumerate(all_cells_values) if v in values]
+        if len(indexes) == 1:
+            (index,) = indexes
+            all_cells_values[index] = {v}
+
+    # if we know where a number must be then it can't be anywhere else
+    for i, cell_values in enumerate(all_cells_values):
+        if len(cell_values) == 1:
+            (cell_value,) = cell_values
+            # used, so remove from all others
+            for j, other_cell_values in enumerate(all_cells_values):
+                if j != i:
+                    other_cell_values.discard(cell_value)
+
+    return all_cells_values
+
+
 def sudoku(get_input):
     solver = Solver()
 

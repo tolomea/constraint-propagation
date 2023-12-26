@@ -1,4 +1,5 @@
 from src.common import get_test_input
+from src.sudoku import constraint
 from src.sudoku import sudoku
 
 
@@ -56,3 +57,13 @@ def test_expert():
         ".3...485.",
         ".......6.",
     ]
+
+
+def test_constraint_only():
+    res = constraint([{1, 2, 3, 4}, {2, 3, 4}, {2, 3, 4}, {2, 3, 4}])
+    assert res == [{1}, {2, 3, 4}, {2, 3, 4}, {2, 3, 4}]
+
+
+def test_constraint_basic():
+    res = constraint([{1}, {1, 2, 3, 4}, {1, 2, 3, 4}, {3}])
+    assert res == [{1}, {2, 4}, {2, 4}, {3}]
