@@ -2,6 +2,20 @@ from src.common import Solver
 from src.common import get_user_input
 
 
+def format(cells):
+    res = []
+    for row in range(9):
+        line = []
+        for col in range(9):
+            vals = cells[(row, col)]
+            if len(vals) == 1:
+                line.append(str(vals.pop()))
+            else:
+                line.append(".")
+        res.append("".join(line))
+    return res
+
+
 def sudoku(get_input):
     solver = Solver()
 
@@ -17,6 +31,10 @@ def sudoku(get_input):
             else:
                 solver.set_cell(cell, {int(c)})
 
+    return format(solver.get_cells())
+
 
 if __name__ == "__main__":
-    sudoku(get_user_input)
+    res = sudoku(get_user_input)
+    for row in res:
+        print(row)  # noqa: T201

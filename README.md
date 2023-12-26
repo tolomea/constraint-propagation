@@ -56,3 +56,19 @@ def sudoku(get_input):
             else:
                 solver.set_cell(cell, {int(c)})
 ```
+
+We also want to be able to print it back to make sure it was loaded ok.
+```
+def format(cells):
+    res = []
+    for row in INTS:
+        line = []
+        for col in INTS:
+            vals = cells[(row, col)]
+            if len(vals) == 1:
+                line.append(str(vals.pop()))
+            else:
+                line.append(".")
+        res.append("".join(line))
+    return res
+```

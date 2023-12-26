@@ -39,3 +39,6 @@ class Solver:
 
     def set_cell(self, name, values):
         self.cells[name] = set(values)
+
+    def get_cells(self):
+        return {key: set(val) for key, val in self.cells.items()}
