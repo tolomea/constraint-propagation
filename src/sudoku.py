@@ -1,3 +1,6 @@
+from itertools import chain
+from itertools import combinations
+
 from src.common import Solver
 from src.common import get_user_input
 
@@ -16,6 +19,11 @@ def format(cells):
     return res
 
 
+def all_subsets(iterable):
+    s = list(iterable)
+    return chain.from_iterable(combinations(s, r) for r in range(1, len(s)))
+
+
 def constraint(all_cells_values: list[set[int]]) -> list[set[int]]:
     # if a number can only be in one place then nothing else can be there
     for v in range(1, 10):
@@ -25,13 +33,15 @@ def constraint(all_cells_values: list[set[int]]) -> list[set[int]]:
             all_cells_values[index] = {v}
 
     # if we know where a number must be then it can't be anywhere else
-    for i, cell_values in enumerate(all_cells_values):
-        if len(cell_values) == 1:
-            (cell_value,) = cell_values
+    for cells in all_subsets(range(len(all_cells_values))):
+        cells_values = set()
+        for cell in cells:
+            cells_values |= all_cells_values[cell]
+        if len(cells_values) == len(cells):
             # used, so remove from all others
-            for j, other_cell_values in enumerate(all_cells_values):
-                if j != i:
-                    other_cell_values.discard(cell_value)
+            for other_cell, other_cell_values in enumerate(all_cells_values):
+                if other_cell not in cells:
+                    other_cell_values -= cells_values
 
     return all_cells_values
 

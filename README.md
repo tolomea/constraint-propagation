@@ -93,3 +93,8 @@ def constraint(all_cells_possible_values: list[set[int]]) -> list[set[int]]:
                     other_cell_possible_values.discard(cell_possible_value)
     return all_cells_possible_values
 ```
+
+However consider the case where two cells can both be either 1 or 2 but nothing else, this tells us none of the other cells can be 1 or 2.
+Likewise if one cell can be 1 or 2, another 2 or 3 and a third 1 or 3. Then those 3 cells have "covered" the values 1, 2 and 3 and those values can't appear in the other cells.
+So our statement above can be broadened to "if N cells can only contain N values then those values can't be in any of the other cells".
+That might look like:
