@@ -1,0 +1,72 @@
+[flake8]
+extend-ignore =
+    # Loop control variable not used within the loop body TODO enable this
+    B007
+    # use raise exception instead of assert False TODO enable this
+    B011
+    # Abstract base class with no abstract method.
+    B024
+    # use "{s!r}" instead of "'{s}'" TODO enable this
+    B028
+    # Whitespace before ':', conflicts with Black
+    E203
+    # Line length, conflicts with Black
+    E501
+    # Multiple statements on one line
+    # Handled by Black in a way flake8 disagrees with
+    E701
+    # Do not use variables named 'I', 'O', or 'l'
+    E741
+    # unnecessary variable assignment before return statement.
+    R504
+    # unnecessary else after return statement.
+    R505
+    # unnecessary else after raise statement.
+    R506
+    # unnecessary else after continue statement.
+    R507
+    # unnecessary else after break statement.
+    R508
+    # unnecessary else after break statement.
+    SIM102
+    # Use 'contextlib.suppress(...)' instead of try-except-pass
+    SIM105
+    # Combine conditions via a logical or to prevent duplicating code, TODO maybe enable
+    SIM114
+    # Merge with-statements that use the same scope, TODO maybe enable
+    SIM117
+    # Use 'a_dict.get(key, "default_value")' instead of an if-block
+    SIM401
+extend-select =
+    # don't use return X in generators
+    B901
+    # only use self and cls for first args
+    B902
+ban-relative-imports = parents
+banned-modules =
+    onelogin = Do not import OneLogin directly, only auth_ext.saml is allowed to do that
+    auth_ext.saml = Do not use auth_ext.saml directly, instead use auth_ext.sso
+    django.db.models = Do not use django.db.models directly, instead use common.models
+    django.db.models.functions = Do not use django.db.models.functions directly, instead use common.models
+    django.contrib.postgres.fields = Do not use django.contrib.postgres.fields directly, instead use common.models
+    django.contrib.postgres.aggregates = Do not use django.contrib.postgres.aggregates directly, instead use common.models
+    django.contrib.admin = Do not use django.contrib.admin directly, instead use common.admin
+    common.admin.SimpleListFilter = Do not use SimpleListFilter, prefer BasicListFilter
+extend-immutable-calls = timedelta, Decimal
+per-file-ignores =
+    # allowing prints in some files
+    */commands/**.py:T20,I251
+    */tests/**.py:T20,I251
+    */tests.py:T20,I251
+    devops/utils/**.py:T20,INP001
+    # allow no __init__ at the toplevel
+    conftest.py:INP001
+    manage.py:INP001
+    safety-harness.py:INP001
+    .github/utils/*.py:INP001
+    # banned-modules exceptions
+    auth_ext/saml.py:I251
+    auth_ext/sso.py:I251
+    common/models.py:I251
+    common/admin.py:I251
+    */migrations/**.py:I251
