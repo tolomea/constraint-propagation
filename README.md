@@ -1,2 +1,58 @@
 # constraint-propagation
 Let's use constraint propagation to solve some problems.
+
+These problems will all have the following properties:
+
+1. There are a number of squares, lets call them cells since they are not always squares.
+2. Each can have one and only one correct value and the goal is to find those correct values.
+4. There are a number of constraints that limit what values the cells can take on.
+5. All information is available at the start.
+6. Additionally at the start we may already have the final values for some cells.
+
+
+As a concrete example lets consider Sudoku.
+1. It's played on a 9x9 grid of 81 cells
+2. Each cell will have a value between 1 and 9 and we need to find those values.
+3. There are 3 rules that limit what values cells can take on:
+3.1. The values 1-9 may appear only once in each row.
+3.2. The values 1-9 may appear only once in each column.
+3.3. If we divide the 9x9 gird into a 3x3 grid of 3x3 blocks then the values 1-9 may appear only once in each block.
+(These could be viewed as the same constraint applied to differing sets of cells).
+
+We're going to need some input from the user, so they can describe the problem to us.
+To make this easier I have made a wrapper around the builtin `input` that can also do some validation.
+We're going to pass this into the specific problems dependency injection style as that will make testing easier.
+
+To read in a Sudoku puzzle will look something like:
+```
+def sudoku(get_input):
+    for row in range(1, 10):
+        line = get_input(f"Enter row {row}, use '.' for empty", pattern=r"[.0-9]{9}")
+        # do stuff with line
+```
+
+
+We're going to have a general solver which will be used with all the problems.
+The solver doesn't need to be aware of size or shape of the problem, all it really needs to know is:
+1. What cells are there
+2. What are their possible values
+3. What constraints exist over what cells
+
+We're going to treat a cell "name" as anything that can be used as a dictionary key.
+And the values are going to be anything that can be put in a set.
+For Sudoku the names are going to be `(row, col)` tuples and the values integers.
+
+Extending the above to create a solver and pass it the initial values would look like:
+To read in a Sudoku puzzle will look something like:
+```
+def sudoku(get_input):
+    solver = Solver()
+    for row in range(1, 10):
+        line = get_input(f"Enter line {i} use '.' for empty", pattern=r"[.0-9]{9}")
+        for col, c in enumerate(line, start=1):
+            cell = (row, col)
+            if c == ".":
+                solver.set_cell(cell, set(range(1, 10)))
+            else:
+                solver.set_cell(cell, {int(c)})
+```

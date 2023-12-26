@@ -29,3 +29,13 @@ def get_test_input(lines):
         if convert:
             value = convert(value)
         return value
+
+    return inner
+
+
+class Solver:
+    def __init__(self):
+        self.cells = {}
+
+    def set_cell(self, name, values):
+        self.cells[name] = set(values)
