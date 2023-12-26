@@ -61,6 +61,17 @@ def sudoku(get_input):
             else:
                 solver.set_cell(cell, {int(c)})
 
+    # add constraints
+    for i in range(9):
+        solver.add_constraint([(i, j) for j in range(9)], constraint)
+        solver.add_constraint([(j, i) for j in range(9)], constraint)
+
+    for i in [0, 3, 6]:
+        for j in [0, 3, 6]:
+            solver.add_constraint(
+                [(i + k, j + l) for k in [0, 1, 2] for l in [0, 1, 2]], constraint
+            )
+
     return format(solver.get_cells())
 
 

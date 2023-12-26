@@ -98,3 +98,18 @@ However consider the case where two cells can both be either 1 or 2 but nothing 
 Likewise if one cell can be 1 or 2, another 2 or 3 and a third 1 or 3. Then those 3 cells have "covered" the values 1, 2 and 3 and those values can't appear in the other cells.
 So our statement above can be broadened to "if N cells can only contain N values then those values can't be in any of the other cells".
 That might look like:
+
+Next we need to tell the solver about the constraints.
+
+```
+    # add constraints
+    for i in INTS:
+        solver.add_constraint([(i, j) for j in INTS], constraint)
+        solver.add_constraint([(j, i) for j in INTS], constraint)
+
+    for i in [1, 4, 7]:
+        for j in [1, 4, 7]:
+            solver.add_constraint(
+                [(i + k, j + l) for k in [0, 1, 2] for l in [0, 1, 2]], constraint
+            )
+```
