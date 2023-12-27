@@ -113,3 +113,64 @@ Next we need to tell the solver about the constraints.
                 [(i + k, j + l) for k in [0, 1, 2] for l in [0, 1, 2]], constraint
             )
 ```
+
+We're about done with Sudoku, the only thing left is a little solve and print:
+```
+    solver.solve()
+
+    return format(solver.get_cells())
+```
+
+Which brings us around to the question of what magic is the solver doing?
+First there's the book keeping for the stuff we've given it.
+```
+class Solver:
+    def __init__(self):
+        self.cells = {}
+        self.constraint_cells = []
+        self.constraint_funcs = []
+        self.cell_constraints = {}
+
+    def set_cell(self, name, values):
+        self.cells[name] = set(values)
+        if name not in self.cell_constraints:
+            self.cell_constraints[name] = set()
+
+    def get_cells(self):
+        return {key: set(val) for key, val in self.cells.items()}
+
+    def add_constraint(self, cells, constraint_func):
+        index = len(self.constraint_cells)
+        assert index == len(self.constraint_funcs)
+        self.constraint_cells.append(list(cells))
+        self.constraint_funcs.append(constraint_func)
+        for cell in cells:
+            self.cell_constraints.setdefault(cell, set()).add(index)
+
+```
+
+The core constraint propagation algorithim is quite straight forward.
+0: put all the constraints in a queue
+1: take a constraint off the queue
+2: fetch the values for it's cells
+3: call the constraint to evaluate the cells values
+4: check the new cell values against the existing ones
+5: if a cells values changed update them and add any constraints for that cell to the queue
+6: repeat until the queue is empty
+```
+    def propagate(self):
+        # put all the constraints in the queue
+        queue = set(range(len(self.constraint_cells)))
+
+        while queue:
+            index = queue.pop()
+            cells = self.constraint_cells[index]
+            values = [self.cells[cell] for cell in cells]
+
+            new_values = self.constraint_funcs[index]([set(vals) for vals in values])
+            for cell, old, new in zip(cells, values, new_values):
+                if new != old:
+                    self.cells[cell] = new
+                    queue.update(self.cell_constraints[cell])
+        return
+```

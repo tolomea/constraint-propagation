@@ -72,6 +72,8 @@ def sudoku(get_input):
                 [(i + k, j + l) for k in [0, 1, 2] for l in [0, 1, 2]], constraint
             )
 
+    solver.propagate()
+
     return format(solver.get_cells())
 
 

@@ -33,6 +33,10 @@ def get_test_input(lines):
     return inner
 
 
+class Inconsistent(Exception):
+    pass
+
+
 class Solver:
     def __init__(self):
         self.cells = {}
@@ -55,3 +59,21 @@ class Solver:
         self.constraint_funcs.append(constraint_func)
         for cell in cells:
             self.cell_constraints.setdefault(cell, set()).add(index)
+
+    def propagate(self):
+        # put all the constraints in the queue
+        queue = set(range(len(self.constraint_cells)))
+
+        while queue:
+            index = queue.pop()
+            cells = self.constraint_cells[index]
+            values = [self.cells[cell] for cell in cells]
+
+            new_values = self.constraint_funcs[index]([set(vals) for vals in values])
+            for cell, old, new in zip(cells, values, new_values):
+                if new != old:
+                    if not new:  # ran out of options, something is wrong
+                        raise Inconsistent()
+                    self.cells[cell] = new
+                    queue.update(self.cell_constraints[cell])
+        return
