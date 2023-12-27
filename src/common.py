@@ -77,3 +77,35 @@ class Solver:
                     self.cells[cell] = new
                     queue.update(self.cell_constraints[cell])
         return
+
+    def copy(self):
+        new_solver = Solver()
+        new_solver.cells = {k: set(vals) for k, vals in self.cells.items()}
+        new_solver.constraint_cells = list(self.constraint_cells)
+        new_solver.constraint_funcs = list(self.constraint_funcs)
+        new_solver.cell_constraints = {
+            k: set(vals) for k, vals in self.cell_constraints.items()
+        }
+        return new_solver
+
+    def is_done(self):
+        return all(len(v) == 1 for v in self.cells.values())
+
+    def solve(self):
+        try:
+            self.propagate()
+        except Inconsistent:
+            return None
+
+        if self.is_done():
+            return self
+
+        for cell, values in self.cells.items():
+            if len(values) > 1:
+                for value in values:
+                    new_solver = self.copy()
+                    new_solver.cells[cell] = {value}
+                    if result := new_solver.solve():
+                        return result
+
+        return None

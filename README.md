@@ -174,3 +174,66 @@ The core constraint propagation algorithim is quite straight forward.
                     queue.update(self.cell_constraints[cell])
         return
 ```
+
+This alone is enough to solve easy problems.
+However it cannot solve problems requiring advanced techniques like XY Wing.
+Fundamentally these advanced techniques rely on evaluating multiple constraints together.
+We could code up systems for this... or we could guess.
+The constraint propagation is doing most of the heavy lifting, we just need a way to break out of complex deadends.
+A guess, test and backtrack setup could do this.
+For this we need a way to copy the current state:
+```
+    def copy(self):
+        new_solver = Solver()
+        new_solver.cells = {k: set(vals) for k, vals in self.cells.items()}
+        new_solver.constraint_cells = list(self.constraint_cells)
+        new_solver.constraint_funcs = list(self.constraint_funcs)
+        new_solver.cell_constraints = {
+            k: set(vals) for k, vals in self.cell_constraints.items()
+        }
+        return new_solver
+```
+
+A way to test if we're done:
+```
+    def is_done(self):
+        return all(len(v) == 1 for v in self.cells.values())
+```
+
+And then the basic plan is
+0: propagate
+1: if that fails return None
+2: if we're done return
+3: otherwise try guesses on copies
+4: if one works return
+5: otherwise return None
+```
+    def solve(self):
+        try:
+            self.propagate()
+        except Inconsistent:
+            return None
+
+        if self.is_done():
+            return self
+
+        for cell, values in self.cells.items():
+            if len(values) > 1:
+                for value in values:
+                    new_solver = self.copy()
+                    new_solver.cells[cell] = {value}
+                    if result := new_solver.solve():
+                        return result
+
+        return None
+```
+
+And a small update to the main Sudoku function:
+```
+    if solution := solver.solve():
+        return format(solution.get_cells())
+
+    return []
+```
+
+And that's it, Sudoku solved.

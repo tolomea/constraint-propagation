@@ -1,6 +1,3 @@
-import pytest
-
-from src.common import Inconsistent
 from src.common import get_test_input
 from src.sudoku import constraint
 from src.sudoku import sudoku
@@ -52,15 +49,15 @@ def test_expert():
     res = sudoku(get_input)
     print(res)  # noqa: T201
     assert res == [
-        "..41785.6",
-        "..524.189",
-        ".1...94.7",
-        "..2.91675",
-        "......291",
-        ".5.627348",
-        "4..7..913",
-        ".3.9.4852",
-        "5.....764",
+        "294178536",
+        "375246189",
+        "618539427",
+        "842391675",
+        "763485291",
+        "951627348",
+        "486752913",
+        "137964852",
+        "529813764",
     ]
 
 
@@ -78,8 +75,9 @@ def test_invalid():
             ".......6.",
         ]
     )
-    with pytest.raises(Inconsistent):
-        sudoku(get_input)
+    res = sudoku(get_input)
+    print(res)  # noqa: T201
+    assert res == []
 
 
 def test_constraint_only():
