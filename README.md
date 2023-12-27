@@ -1,5 +1,4 @@
-# constraint-propagation
-Let's use constraint propagation to solve some problems.
+# Let's use constraint propagation to solve some problems.
 
 These problems will all have the following properties:
 
@@ -9,17 +8,24 @@ These problems will all have the following properties:
 5. All information is available at the start.
 6. Additionally at the start we may already have the final values for some cells.
 
+# Sudoku
 
 As a concrete example lets consider Sudoku.
 1. It's played on a 9x9 grid of 81 cells
-2. Each cell will have a value between 1 and 9 and we need to find those values.
-3. There are 3 rules that limit what values cells can take on:
-3.1. The values 1-9 may appear only once in each row.
-3.2. The values 1-9 may appear only once in each column.
-3.3. If we divide the 9x9 gird into a 3x3 grid of 3x3 blocks then the values 1-9 may appear only once in each block.
+1. Each cell will have a value between 1 and 9 and we need to find those values.
+1. There are 3 rules that limit what values cells can take on:
+   1. The values 1-9 may appear only once in each row.
+   1. The values 1-9 may appear only once in each column.
+   1. If we divide the 9x9 gird into a 3x3 grid of 3x3 blocks then the values 1-9 may appear only once in each block.
+
 (These could be viewed as the same constraint applied to differing sets of cells).
 
-We're going to need some input from the user, so they can describe the problem to us.
+## I/O
+
+We're going to need some interaction with the user, so they can describe the problem to us and we can tell them the solution.
+
+### Input
+
 To make this easier I have made a wrapper around the builtin `input` that can also do some validation.
 We're going to pass this into the specific problems dependency injection style as that will make testing easier.
 
@@ -31,6 +37,7 @@ def sudoku(get_input):
         # do stuff with line
 ```
 
+### Solver Creation
 
 We're going to have a general solver which will be used with all the problems.
 The solver doesn't need to be aware of size or shape of the problem, all it really needs to know is:
@@ -57,6 +64,8 @@ def sudoku(get_input):
                 solver.set_cell(cell, {int(c)})
 ```
 
+### Output
+
 We also want to be able to print it back to make sure it was loaded ok.
 ```
 def format(cells):
@@ -73,31 +82,60 @@ def format(cells):
     return res
 ```
 
-Next we need to explain the constraints to the Solver. For the Solver a constrain consists of two essential things:
+## Constraints
+
+Next we need to explain the constraints to the Solver. For the Solver a constraint consists of two essential things:
 1. A set of cells the constraint applies to.
 2. A function which takes the current possible values for those cells and returns the new (hopefully reduced) possible values.
 
-For Sudoku the constraint is that "a value can only appear once within the associated cells".
-We need to reframe this so that it tell us about the other cells.
-"If a value must appear in once cell then it can't appear in any of the others."
-That might look like:
+For Sudoku the constraint is that "each number appears once and only once within the associated cells".
+We need to break this out into the two directions and express it in a way that dictates the values of the cells.
+
+### One value per cell
+
+First "if a value can only be in one cell then nothing else can be in that cell"
+```
+    for v in range(1, 10):
+        indexes = [i for i, values in enumerate(all_cells_values) if v in values]
+        if len(indexes) == 1:
+            (index,) = indexes
+            all_cells_values[index] = {v}
 
 ```
-def constraint(all_cells_possible_values: list[set[int]]) -> list[set[int]]:
-    for i, cell_possible_values in enumerate(all_cells_possible_values):
-        if len(cell_possible_values) == 1:
-            (cell_possible_value,) = cell_possible_values
-            # used, so remove from all others
-            for j, other_cell_possible_values in enumerate(all_cells_possible_values):
-                if j != i:
-                    other_cell_possible_values.discard(cell_possible_value)
-    return all_cells_possible_values
+
+### Once cell per value
+
+And then "if a particular value has to be in once cell then it can't be in any other cell".
 ```
+    for i, cell_values in enumerate(all_cells_values):
+        if len(cell_values) == 1:
+            (cell_value,) = cell_values
+            # used, so remove from all others
+            for j, other_cell_values in enumerate(all_cells_values):
+                if j != i:
+                    other_cell_values.discard(cell_value)
+```
+
+### N cells for N values
 
 However consider the case where two cells can both be either 1 or 2 but nothing else, this tells us none of the other cells can be 1 or 2.
 Likewise if one cell can be 1 or 2, another 2 or 3 and a third 1 or 3. Then those 3 cells have "covered" the values 1, 2 and 3 and those values can't appear in the other cells.
-So our statement above can be broadened to "if N cells can only contain N values then those values can't be in any of the other cells".
+So our second statement above can be broadened to "if N cells can only contain N values then those values can't be in any of the other cells".
 That might look like:
+```
+    for cells in all_subsets(range(len(all_cells_values))):
+        cells_values = set()
+        for cell in cells:
+            cells_values |= all_cells_values[cell]
+        if len(cells_values) == len(cells):
+            # used, so remove from all others
+            for other_cell, other_cell_values in enumerate(all_cells_values):
+                if other_cell not in cells:
+                    other_cell_values -= cells_values
+
+```
+
+### Construction
 
 Next we need to tell the solver about the constraints.
 
@@ -114,6 +152,8 @@ Next we need to tell the solver about the constraints.
             )
 ```
 
+## Wrapup
+
 We're about done with Sudoku, the only thing left is a little solve and print:
 ```
     solver.solve()
@@ -121,7 +161,12 @@ We're about done with Sudoku, the only thing left is a little solve and print:
     return format(solver.get_cells())
 ```
 
+# Solving
+
 Which brings us around to the question of what magic is the solver doing?
+
+## Book keeping
+
 First there's the book keeping for the stuff we've given it.
 ```
 class Solver:
@@ -149,6 +194,8 @@ class Solver:
 
 ```
 
+## Propagation
+
 The core constraint propagation algorithim is quite straight forward.
 0: put all the constraints in a queue
 1: take a constraint off the queue
@@ -174,6 +221,8 @@ The core constraint propagation algorithim is quite straight forward.
                     queue.update(self.cell_constraints[cell])
         return
 ```
+
+## Recursive guessing
 
 This alone is enough to solve easy problems.
 However it cannot solve problems requiring advanced techniques like XY Wing.
@@ -227,6 +276,8 @@ And then the basic plan is
 
         return None
 ```
+
+## Wrapup
 
 And a small update to the main Sudoku function:
 ```
