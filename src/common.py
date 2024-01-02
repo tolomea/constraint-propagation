@@ -1,34 +1,39 @@
 import re
 
 
+def parse_line(value, pattern, convert):
+    if pattern:
+        if not re.fullmatch(pattern, value):
+            raise Exception(f"Does not match '{pattern}'")
+    if convert:
+        value = convert(value)
+    return value
+
+
 def get_user_input(prompt, pattern=None, convert=None):
     while True:
         value = input(f"{prompt}: ")
         if not value:
             continue
-        if pattern:
-            if not re.fullmatch(pattern, value):
-                print(f"Does not match '{pattern}'")  # noqa: T201
-                continue
-        if convert:
-            try:
-                value = convert(value)
-            except Exception as e:
-                print(e)  # noqa: T201
-                continue
-        return value
+        try:
+            value = parse_line(value, pattern=pattern, convert=convert)
+        except Exception as e:
+            print(e)  # noqa: T201
+            continue
+        else:
+            return value
 
 
-def get_test_input(lines):
+def get_canned_input(lines):
     lines = list(lines)
 
     def inner(prompt, pattern=None, convert=None):
         value = lines.pop(0)
-        if pattern:
-            assert re.fullmatch(pattern, value), (pattern, value)
-        if convert:
-            value = convert(value)
-        return value
+        try:
+            return parse_line(value, pattern=pattern, convert=convert)
+        except Exception:
+            print(value)  # noqa: T201
+            raise
 
     return inner
 

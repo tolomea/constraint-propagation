@@ -1,9 +1,9 @@
-from src.common import get_test_input
+from src.common import get_canned_input
 from src.sudoku import sudoku
 
 
 def test_basic():
-    get_input = get_test_input(
+    get_input = get_canned_input(
         [
             ".48326.19",
             "....5..72",
@@ -32,7 +32,7 @@ def test_basic():
 
 
 def test_expert():
-    get_input = get_test_input(
+    get_input = get_canned_input(
         [
             "..4..8..6",
             "..52..18.",
@@ -61,7 +61,7 @@ def test_expert():
 
 
 def test_invalid():
-    get_input = get_test_input(
+    get_input = get_canned_input(
         [
             ".44..8..6",
             "..52..18.",
