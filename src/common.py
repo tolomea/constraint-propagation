@@ -1,22 +1,29 @@
 import re
 
 
-def parse_line(value, pattern, convert):
+def parse_line(value, pattern, convert, groups):
+    assert not (convert and groups)
+    if groups:
+        assert pattern
+
     if pattern:
-        if not re.fullmatch(pattern, value):
+        match = re.fullmatch(pattern, value)
+        if not match:
             raise Exception(f"Does not match '{pattern}'")
     if convert:
         value = convert(value)
+    if groups:
+        value = match.groups(groups)
     return value
 
 
-def get_user_input(prompt, pattern=None, convert=None):
+def get_user_input(prompt, pattern=None, convert=None, groups=None):
     while True:
         value = input(f"{prompt}: ")
         if not value:
             continue
         try:
-            value = parse_line(value, pattern=pattern, convert=convert)
+            value = parse_line(value, pattern=pattern, convert=convert, groups=groups)
         except Exception as e:
             print(e)  # noqa: T201
             continue
@@ -27,10 +34,10 @@ def get_user_input(prompt, pattern=None, convert=None):
 def get_canned_input(lines):
     lines = list(lines)
 
-    def inner(prompt, pattern=None, convert=None):
+    def inner(prompt, pattern=None, convert=None, groups=None):
         value = lines.pop(0)
         try:
-            return parse_line(value, pattern=pattern, convert=convert)
+            return parse_line(value, pattern=pattern, convert=convert, groups=groups)
         except Exception:
             print(value)  # noqa: T201
             raise

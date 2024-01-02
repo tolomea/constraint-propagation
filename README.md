@@ -305,3 +305,37 @@ Some rows and columns have numbers at one or both ends saying how many towers ar
 First up lets pull out this idea of a Latin Square into a helper.
 There's no new code to that, it's mostly moving half of sudoku.py to a new file.
 It exposes one main function `get_solver` which takes a size and an input function and returns a solver pre-initilized with the latin square row and column constraints and possible values for each cell.
+
+## I/O
+
+### Input
+
+The size of this puzzle is variable, it will be easier if we just ask up front what size it is.
+Then we just need to read it all in.
+```
+    size = get_input("Puzzle size", convert=int)
+    top = get_input(
+        "Enter top limits, start with a space, use space where there is no limit",
+        pattern=rf" [ 1-{size}]{{0,{size}}}",
+    )
+    latin_square_input = []
+    starts = []
+    ends = []
+    for row in range(size):
+        start, middle, end = get_input(
+            f"Enter line {row + 1} use '.' for empty, include the start and end limits,"
+            " use space for no limit.",
+            pattern=(
+                rf"(?P<start>[ 1-{size}])"
+                rf"(?P<middle>[.1-{size}]{{{size}}})"
+                rf"(?P<end>[ 1-{size}]?)"
+            ),
+        )
+        starts.append(start)
+        latin_square_input.append(middle)
+        ends.append(end)
+    bottom = get_input(
+        "Enter bottom limits, start with a space, use space where there is no limit",
+        pattern=rf" [ 1-{size}]{{0,{size}}}",
+    )
+```
