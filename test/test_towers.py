@@ -1,5 +1,5 @@
-from src.towers import towers
 from src.common import get_canned_input
+from src.towers import towers
 
 
 def test_basic():

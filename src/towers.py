@@ -1,5 +1,4 @@
-from src import latin_square
-from src.common import get_user_input, get_canned_input
+from src.common import get_user_input
 
 
 def towers(get_input):
