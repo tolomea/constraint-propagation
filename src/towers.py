@@ -1,3 +1,5 @@
+from src import latin_square
+from src.common import get_canned_input
 from src.common import get_user_input
 
 
@@ -32,6 +34,13 @@ def towers(get_input):
         "Enter bottom limits, start with a space, use space where there is no limit",
         pattern=rf" [ 1-{size}]{{0,{size}}}",
     )
+
+    solver = latin_square.get_solver(size, get_canned_input(latin_square_input))
+
+    if solution := solver.solve():
+        return latin_square.format(size, solution.get_cells())
+
+    return []
 
 
 if __name__ == "__main__":

@@ -339,3 +339,18 @@ Then we just need to read it all in.
         pattern=rf" [ 1-{size}]{{0,{size}}}",
     )
 ```
+
+### Solver Creation and Output
+
+And then hook it up to the latin square, solve and print.
+
+```
+    solver = latin_square.get_solver(size, get_canned_input(latin_square_input))
+
+    if solution := solver.solve():
+        return latin_square.format(size, solution.get_cells())
+
+    return []
+```
+
+It works at this point because the latin square code can find a valid solution. But it's not a towers solution because we are missing the towers constraints.

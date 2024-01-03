@@ -16,7 +16,9 @@ def test_basic():
             " 31322",
         ]
     )
-    towers(get_input)
+    res = towers(get_input)
+    print(res)  # noqa: T201
+    assert res == ["12345", "21453", "34512", "45231", "53124"]
 
 
 def test_expert():
@@ -33,7 +35,9 @@ def test_expert():
             " 3 42",
         ]
     )
-    towers(get_input)
+    res = towers(get_input)
+    print(res)  # noqa: T201
+    assert res == ["124356", "215463", "341625", "436512", "563241", "652134"]
 
 
 def test_expert_padded():
@@ -50,4 +54,6 @@ def test_expert_padded():
             " 3 42  ",
         ]
     )
-    towers(get_input)
+    res = towers(get_input)
+    print(res)  # noqa: T201
+    assert res == ["124356", "215463", "341625", "436512", "563241", "652134"]
