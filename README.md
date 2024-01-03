@@ -288,3 +288,20 @@ And a small update to the main Sudoku function:
 ```
 
 And that's it, Sudoku solved.
+
+# Towers
+
+I know of towers from [Simon Tatham's Portable Puzzle Collection](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/)
+![Towers game image](https://www.chiark.greenend.org.uk/~sgtatham/puzzles/towers-web.png)
+
+The basic idea is you have a gird of size N.
+Each cell in the grid gets a number 1-N.
+So far a bit like Sudoku but without the sub blocks, this general pattern is called a Latin Square.
+The numbers indicate the height of the tower in that square, when looking from the side a tall tower hides a lower one.
+Some rows and columns have numbers at one or both ends saying how many towers are visible from that location.
+
+## Latin Squares
+
+First up lets pull out this idea of a Latin Square into a helper.
+There's no new code to that, it's mostly moving half of sudoku.py to a new file.
+It exposes one main function `get_solver` which takes a size and an input function and returns a solver pre-initilized with the latin square row and column constraints and possible values for each cell.

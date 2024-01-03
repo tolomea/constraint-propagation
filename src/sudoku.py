@@ -3,7 +3,7 @@ from src.common import get_user_input
 
 
 def sudoku(get_input):
-    solver = latin_square.get_solver(get_input)
+    solver = latin_square.get_solver(9, get_input)
 
     # add block constraints
     for i in [0, 3, 6]:
@@ -14,7 +14,7 @@ def sudoku(get_input):
             )
 
     if solution := solver.solve():
-        return latin_square.format(solution.get_cells())
+        return latin_square.format(9, solution.get_cells())
 
     return []
 
