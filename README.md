@@ -306,9 +306,7 @@ First up lets pull out this idea of a Latin Square into a helper.
 There's no new code to that, it's mostly moving half of sudoku.py to a new file.
 It exposes one main function `get_solver` which takes a size and an input function and returns a solver pre-initilized with the latin square row and column constraints and possible values for each cell.
 
-## I/O
-
-### Input
+## Input
 
 The size of this puzzle is variable, it will be easier if we just ask up front what size it is.
 Then we just need to read it all in.
@@ -340,7 +338,7 @@ Then we just need to read it all in.
     )
 ```
 
-### Solver Creation and Output
+## Solver Creation and Output
 
 And then hook it up to the latin square, solve and print.
 
@@ -354,3 +352,74 @@ And then hook it up to the latin square, solve and print.
 ```
 
 It works at this point because the latin square code can find a valid solution. But it's not a towers solution because we are missing the towers constraints.
+
+## Constraint
+
+The constraint for this one is somewhat harder to evaluate.
+I'm going to take the brute force approach of enumerating all possible patterns then checking them against the limits.
+This isn't very effecient but with the small grid sizes it won't matter much.
+Also the new constraint will effectively duplicate some of the latin square constraints again this inefficiency won't matter much.
+
+### All patterns
+
+Getting all the patterns that can be made with the remaining cell values is a fairly straight foward recursive affair.
+
+
+```
+def _all_possible_patterns(all_cells_values):
+    first_cell_values, *remaining_cells_values = all_cells_values
+
+    # deal with the rest of the problem
+    if not remaining_cells_values:
+        remaining_cells_patterns = [[]]  # only empty list
+    else:
+        remaining_cells_patterns = _all_possible_patterns(remaining_cell_values)
+
+    # then add us onto the front
+    for remaining_cells_pattern in remaining_cell_patterns:
+        used_values = set(remaining_cell_pattern)
+        for value in first_cell_values - used_values:
+            yield [value] + remaining_cells_pattern
+```
+
+A pro tip for writing recursive stuff: you only want part solutions flowing one way in the call tree, generally up. Avoid passing part of the solution down and then part of it back up. This helps keep the recurisve formulation simple. In this example it would be a mistake to  write it in a way where you were passing used values down into the next `_all_possible_patterns call` so you didn't use them again.
+
+### Check limit
+
+Actually checking the limits is a simple counting affair.
+
+
+```
+def _check_pattern_against_limit(limit, pattern):
+    prev = float("-inf")
+    count = 0
+    for value in pattern:
+        if value > prev:
+            prev = value
+            count += 1
+    return count == limit
+```
+
+### Check constraint
+
+Then we tie it all together and use a closure capture the limit values.
+
+```
+def constraint(start_limit, end_limit):
+    def inner(all_cells_values: list[set[int]]) -> list[set[int]]:
+        # filter to only the patterns that match the limits
+        good_patterns = []
+        for pattern in _all_possible_patterns(all_cells_values):
+            if start_limit:
+                if not _check_pattern_against_limit(start_limit, pattern):
+                    continue
+            if end_limit:
+                if not _check_pattern_against_limit(end_limit, reversed(pattern)):
+                    continue
+            good_patterns.append(pattern)
+
+        # flatten and return the result
+        return [set(values) for values in zip(good_patterns)]
+
+    return inner
+```
